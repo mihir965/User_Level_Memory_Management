@@ -6,7 +6,6 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <stddef.h>
-#include <pthread.h>
 
 /* ============================================================================
  *  Virtual Memory Simulation Header
@@ -40,15 +39,15 @@
 //COMPLETE HERE
 
 // --- Constants for bit shifts and masks ---
-#define PDXSHIFT      22u /** (These will give us the top 10 bits - For the page directory index) TODO: number of bits to shift for directory index **/
-#define PTXSHIFT      12u/** (middle 10 bits for the page table index after the directory) TODO: number of bits to shift for table index **/
-#define PXMASK        0x3FFu/** (10 bits mask: 0b11_1111_1111) TODO:  **/
-#define OFFMASK       0xFFFu/** (12 bts mask : 0b1111_1111_1111) TODO: **/
+#define PDXSHIFT      /** TODO: number of bits to shift for directory index **/
+#define PTXSHIFT      /** TODO: number of bits to shift for table index **/
+#define PXMASK        /** TODO:  **/
+#define OFFMASK       /** TODO: **/
 
 // --- Macros to extract address components ---
-#define PDX(va)       (((vaddr32_t)(va) >> PDXSHIFT) & PXMASK)/** TODO: compute directory index from virtual address **/
-#define PTX(va)       (((vaddr32_t)(va) >> PTXSHIFT) & PXMASK)/** TODO: compute table index from virtual address **/
-#define OFF(va)       ((vaddr32_t)(va) & OFFMASK)/** TODO: compute page offset from virtual address **/
+#define PDX(va)       /** TODO: compute directory index from virtual address **/
+#define PTX(va)       /** TODO: compute table index from virtual address **/
+#define OFF(va)       /** TODO: compute page offset from virtual address **/
 
 // -----------------------------------------------------------------------------
 //  Type Definitions
@@ -63,7 +62,7 @@ typedef uint32_t pde_t;       // Page directory entry
 //  Page Table Flags (Students fill as needed)
 // -----------------------------------------------------------------------------
 
-#define PFN_SHIFT     12u/** TODO: number of bits to shift**/
+#define PFN_SHIFT     /** TODO: number of bits to shift**/
 
 // -----------------------------------------------------------------------------
 //  Address Conversion Helpers (Provided)
@@ -93,12 +92,9 @@ struct tlb {
      *   bool valid;
      *   uint64_t last_used;
      */
-    uint32_t vpn; // virtual page number (VA >> PFN_SHIFT)
-    uint32_t pfn; // physical frame number
-    bool valid;
 };
 
-extern struct tlb tlb_store[TLB_ENTRIES];
+extern struct tlb tlb_store;
 
 // -----------------------------------------------------------------------------
 //  Function Prototypes
