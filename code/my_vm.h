@@ -2,10 +2,10 @@
 #define MY_VM_H_INCLUDED
 
 #include <stdbool.h>
-#include <stdlib.h>
-#include <stdio.h>
-#include <stdint.h>
 #include <stddef.h>
+#include <stdint.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 /* ============================================================================
  *  Virtual Memory Simulation Header
@@ -29,69 +29,103 @@
 //  Memory and Paging Configuration
 // -----------------------------------------------------------------------------
 
-#define VA_BITS        32u           // Simulated virtual address width
-#define PGSIZE         4096u         // Page size = 4 KB
+#define VA_BITS 32u  // Simulated virtual address width
+#define PGSIZE 4096u // Page size = 4 KB
 
-#define MAX_MEMSIZE    (1ULL << 32)  // Max virtual memory = 4 GB
-#define MEMSIZE        (1ULL << 30)  // Simulated physical memory = 1 GB
+#define MAX_MEMSIZE (1ULL << 32) // Max virtual memory = 4 GB
+#define MEMSIZE (1ULL << 30)     // Simulated physical memory = 1 GB
 
-
-//COMPLETE HERE
+// COMPLETE HERE
 
 // --- Constants for bit shifts and masks ---
-#define PDXSHIFT      /** TODO: number of bits to shift for directory index **/
-#define PTXSHIFT      /** TODO: number of bits to shift for table index **/
-#define PXMASK        /** TODO:  **/
-#define OFFMASK       /** TODO: **/
+#define PDXSHIFT                                                               \
+  22 /** TODO: number of bits to shift for directory index - Ans - 4KB VA      \
+        layout is [ 10 bits directory | 10 bits table | 12 bits offset ]       \
+        therefore to get the directory bits which are 10 in length, we need to \
+        shift 22 from the left. Basically we are right shifting away the table \
+        and offset bits**/
+#define PTXSHIFT                                                               \
+  12 /** TODO: number of bits to shift for table index Ans - Same as above but \
+        for the table bits**/
+#define PXMASK                                                                 \
+  0x3FF /** TODO: Ans - This is because both the directory and table bits are  \
+           10 bits, meaning that we want to mask off everything other than the \
+           10 LSBits  **/
+#define OFFMASK 0xFFF /** TODO: - This is to get the 12LSBits directly**/
+
+/* Also defining VPNSHIFT and VPNMASK for translate() function so that it is
+ * cleaner */
+#define VPNSHIFT 12
+
+#define VPNMASK 0xFFFF // This is 20 1s in binary
 
 // --- Macros to extract address components ---
-#define PDX(va)       /** TODO: compute directory index from virtual address **/
-#define PTX(va)       /** TODO: compute table index from virtual address **/
-#define OFF(va)       /** TODO: compute page offset from virtual address **/
+#define PDX(va)                                                                \
+  ((VA2U(va) >> PDXSHIFT) &                                                    \
+   PXMASK) /** TODO: compute directory index from virtual address **/
+#define PTX(va)                                                                \
+  ((VA2U(va) >> PTXSHIFT) &                                                    \
+   PXMASK) /** TODO: compute table index from virtual address **/
+#define OFF(va)                                                                \
+  ((VA2U(va)) & OFFMASK) /** TODO: compute page offset from virtual address    \
+                          **/
 
 // -----------------------------------------------------------------------------
 //  Type Definitions
 // -----------------------------------------------------------------------------
 
-typedef uint32_t vaddr32_t;   // Simulated 32-bit virtual address
-typedef uint32_t paddr32_t;   // Simulated 32-bit physical address
-typedef uint32_t pte_t;       // Page table entry
-typedef uint32_t pde_t;       // Page directory entry
+typedef uint32_t vaddr32_t; // Simulated 32-bit virtual address
+typedef uint32_t paddr32_t; // Simulated 32-bit physical address
+typedef uint32_t pte_t;     // Page table entry
+typedef uint32_t pde_t;     // Page directory entry
 
 // -----------------------------------------------------------------------------
 //  Page Table Flags (Students fill as needed)
 // -----------------------------------------------------------------------------
 
-#define PFN_SHIFT     /** TODO: number of bits to shift**/
+#define PFN_SHIFT                                                              \
+  12 /** TODO: number of bits to shift: Ans - The format again of each page    \
+        table entry is [20 bits of the PFN | 12 bits of the flags] therefore   \
+        we need to right shift away the flag bits to get the PFN**/
 
 // -----------------------------------------------------------------------------
 //  Address Conversion Helpers (Provided)
 // -----------------------------------------------------------------------------
 
-static inline vaddr32_t VA2U(void *va)     { return (vaddr32_t)(uintptr_t)va; }
-static inline void*     U2VA(vaddr32_t u)  { return (void*)(uintptr_t)u; }
+static inline vaddr32_t VA2U(void *va) { return (vaddr32_t)(uintptr_t)va; }
+static inline void *U2VA(vaddr32_t u) { return (void *)(uintptr_t)u; }
 
 // -----------------------------------------------------------------------------
 //  TLB Configuration
 // -----------------------------------------------------------------------------
 
-#define TLB_ENTRIES   512   // Default number of TLB entries
+#define TLB_ENTRIES 512 // Default number of TLB entries
+
+struct tlb_entry {
+  uint32_t vpn; // This is the Virtual Page Number of the entry
+  uint32_t pfn; // The page Frame Number of the entry
+  uint8_t valid;
+};
 
 struct tlb {
-    /*
-     * TODO: Define the TLB structure.
-     * Each entry typically includes:
-     *  - Virtual Page Number (VPN)
-     *  - Physical Frame Number (PFN)
-     *  - Valid bit
-     *  - Optional timestamp for replacement policy (e.g., LRU)
-     *
-     * Example:
-     *   uint32_t vpn;
-     *   uint32_t pfn;
-     *   bool valid;
-     *   uint64_t last_used;
-     */
+  /*
+   * TODO: Define the TLB structure.
+   * Each entry typically includes:
+   *  - Virtual Page Number (VPN)
+   *  - Physical Frame Number (PFN)
+   *  - Valid bit
+   *  - Optional timestamp for replacement policy (e.g., LRU)
+   *
+   * Example:
+   *   uint32_t vpn;
+   *   uint32_t pfn;
+   *   bool valid;
+   *   uint64_t last_used;
+   *
+   * Ans: What I am going to be doing is making another struct tlb_entry and
+   * make the tlb struct a container of TLB_ENTRIES number of tlb_entry
+   */
+  struct tlb_entry entries[TLB_ENTRIES];
 };
 
 extern struct tlb tlb_store;
@@ -175,4 +209,3 @@ void get_data(void *va, void *val, int size);
 void mat_mult(void *mat1, void *mat2, int size, void *answer);
 
 #endif // MY_VM_H_INCLUDED
-
