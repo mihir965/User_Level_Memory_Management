@@ -87,6 +87,7 @@ typedef uint32_t pde_t;     // Page directory entry
   12 /** TODO: number of bits to shift: Ans - The format again of each page    \
         table entry is [20 bits of the PFN | 12 bits of the flags] therefore   \
         we need to right shift away the flag bits to get the PFN**/
+#define VALID 0x1
 
 // -----------------------------------------------------------------------------
 //  Address Conversion Helpers (Provided)
