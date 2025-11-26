@@ -157,5 +157,8 @@ int main() {
     printf("Some Problem with free!\n");
   }
 
+  printf("\n ===TLB Stats===\n");
+  print_TLB_missrate();
+
   return 0;
 }
